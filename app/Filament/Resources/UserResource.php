@@ -15,12 +15,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+    protected static ?string $navigationGroup = 'User Management';
+    protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-identification';
 
     public static function form(Form $form): Form
     {
@@ -45,8 +48,10 @@ class UserResource extends Resource
                     ->visibleOn('create'),
                 Select::make('roles')
                     ->relationship('roles', 'name')
-                    ->multiple()
                     ->preload()
+                    ->default(function () {
+                        return Role::where('name', 'PostUser')->first()?->id; // 'user' is your default role
+                    })
                     ->searchable()
             ]);
     }

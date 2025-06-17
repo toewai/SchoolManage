@@ -18,12 +18,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth as Auth;
 
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
 
     public static function form(Form $form): Form
     {
@@ -42,9 +43,8 @@ class PostResource extends Resource
                     ->relationship('user', 'name')
                     ->required()
                     ->label('Author')
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Select an author'),
+                    ->default(Auth::user()->id) // Automatically set the current user as the author
+                    ->disabled(),
             ]);
     }
 
@@ -94,5 +94,9 @@ class PostResource extends Resource
             'create' => Pages\CreatePost::route('/create'),
             'edit' => Pages\EditPost::route('/{record}/edit'),
         ];
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
     }
 }
